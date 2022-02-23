@@ -41,23 +41,68 @@ fn to_pig_latin(str: String) -> String {
 }
 
 fn employee_sys() {
-    let departments : Vec<String> = Vec::new();
-    let employees : HashMap<String, String> = HashMap::new();
+    println!("Type 'Add <name> to <department>' to add an employee");
+    println!("Type 'List <department>' to list the employees of a department");
+    println!("Type 'All' to list all employees by department");
+    println!("Type 'Quit' to quit");
+    let mut employees: HashMap<String, Vec<String>> = HashMap::new();
+    
 
     loop {
-        let mut command = String::new();
-        io::stdin().read_line(&mut command).expect("Failed to read line");
+        let mut input = String::new();
+        let stdin = io::stdin();
+        
+        match stdin.read_line(&mut input) {
+            Ok(_) => {
+                let command : Vec<&str> = input.split_whitespace().collect();
+                match command.as_slice() {
+                    ["All"] => {
+                        for (dept, names) in &employees {
+                            let mut names = names.clone();
+                            names.sort();
+                            for name in names {
+                                println!("{}: {}", dept, name);
+                            }
+                        }
+                    },
+                    ["Quit"] => {
+                        break;
+                    },
+                    ["Add", name, "to", dept] => {
+                        employees.entry(String::from(*dept)).or_default().push(String::from(*name));
+                    },
+                    ["List", dept] => {
+                        match employees.get(*dept) {
+                            Some(names) => {
+                                for name in names {
+                                    println!("{}: {}", dept, name);
+                                }
+                            }
+                            None => println!("I don't recognize that department!"),
+                        }
+                    },
+                    _ => println!("Input error!"),
+                }
+            },
+            Err(error) => println!("error: {}", error),
+        }
     }
 }
 
 fn main() {
+    // 1
     let nums = vec![5, 4, 3, 2, 2, 1];
     let mode = get_mode(&nums);
     println!("The mode of nums is {}", mode);
     let median = get_median(nums);
     println!("The median of nums is {}", median);
+
+    // 2
     let pig_latin_consonant = to_pig_latin(String::from("first"));
     let pig_latin_vowel = to_pig_latin(String::from("apple"));
     println!("{}", pig_latin_consonant);
     println!("{}", pig_latin_vowel);
+
+    // 3
+    employee_sys();
 }
